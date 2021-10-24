@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.12.0/css/xterm.min.css">
+
+    <title>Grow Cabinet - Raspilab Experiments</title>
+
+    <style>
+      body{
+        background-image: url('https://www.raspilab.net/apps/prod_nb/nb_site/img/connect.png');
+      }
+      
+
+        #brick{
+          padding:20px;
+        }
+        #brick-svg{
+          width:240px;
+        }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="https://www.raspilab.net/apps/prod_nb/nb_shared/img/raspilab-logo_256.png" alt="" width="27" height="27" class="d-inline-block align-text-top">  
+          Grow Cabinet</a>
+        
+        
+        <select class="form-select w-25" id="deviceSelect">
+          <option selected>Select Device</option>
+        </select>
+      </div>
+    </nav>
+
+    
+    <div class="container">
+      
+      <div class="d-flex mt-2">
+      <div id="brick">
+          <object data="block-4x4-3.svg" type="image/svg+xml" id="brick-svg"></object>
+      </div>
+      <div class="ms-4">
+        <div id="modes-container">
+          <ul class="nav nav-pills border my-5" id="modes">
+            <li class="nav-item">
+              <a class="p-5 nav-link active" href="#" data-mode="OFF">OFF</a>
+            </li>
+            <li class="nav-item">
+              <a class="p-5 nav-link" href="#" data-mode="ON">ON</a>
+            </li>
+          </ul>
+        </div>
+
+        
+      </div>
+      
+    </div>
+
+      <div id="xterm-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@4.12.0/lib/xterm.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.0/bundles/stomp.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    
+    <script>
+        const term = new Terminal();
+        term.open(document.getElementById('xterm-container'));
+
+        
+        
+            
+
+        let oFeatureHub;
+
+        let fnConnect = function(){
+            DeviceSelection.init("deviceSelect");
+            
+            oFeatureHub = new FeatureHub({
+                appId: "net.raspilab.experiments.growcab",
+                clientId: 'growcab_local'
+            });
+
+            console.log(oFeatureHub)
+
+            oFeatureHub.connect(function(oServerInfo){
+                oFeatureHub.devices(DeviceSelection.onReceiveDevices);
+
+                term.writeln("Connected to " + oServerInfo.webSocketUrl);
+            });
+        };
+
+        let scriptLocation = 'https://my.featurehub.net/lib/v1/fhub.js';
+
+        if(location.hostname.indexOf('.localnet') !== -1){
+            scriptLocation = 'http://my.featurehub.localnet:8787/lib/v1/fhub.js';
+        }
+
+        const script = document.createElement('script');
+        script.src = scriptLocation;
+        script.addEventListener('load', fnConnect);
+        document.body.appendChild(script);
+
+        let DeviceSelection = {};
+
+        DeviceSelection.init = function(sId){
+            let elSelect = document.getElementById("deviceSelect");
+            elSelect.addEventListener("change", DeviceSelection.onSelectDevice);
+
+            DeviceSelection.elSelect = elSelect;
+        };
+
+        DeviceSelection.onReceiveDevices = function(oData){
+          let elSelect = DeviceSelection.elSelect,
+              sCurrentValue = elSelect.value,
+              bCurrentValueFound = false;
+
+          elSelect.innerHTML = "";
+
+          elOpt = document.createElement('option');
+          elOpt.innerHTML = "Select Device";
+          elSelect.appendChild(elOpt);
+
+          for (let i = 0; i<oData.devices.length; i++){
+            let oDevice = oData.devices[i], 
+                elOpt = document.createElement('option');
+            
+            elOpt.value = oDevice.machineId;
+            elOpt.innerHTML = oDevice.hostName;
+            elSelect.appendChild(elOpt);
+
+            if(sCurrentValue && oDevice.machineId === sCurrentValue){
+              bCurrentValueFound = true;
+              elOpt.selected = true;
+            }
+          }
+
+          if(!bCurrentValueFound){
+            sCurrentValue = null;
+          }
+
+          if(!sCurrentValue && oData.devices.length === 1){
+            elSelect.value = oData.devices[0].machineId;
+            DeviceSelection.onSelectDevice();
+          }
+        };
+
+        DeviceSelection.onSelectDevice = function(){
+          let elSelect = DeviceSelection.elSelect,
+              sMachineId = elSelect.value;
+          if(sMachineId){
+            oFeatureHub.unsubscribe('deviceConsole');
+            oFeatureHub.subscribe('deviceConsole', sMachineId + "/console", function(oData, mHeaders){
+                term.writeln(oData.args[0]); 
+            });
+
+            oFeatureHub.unsubscribe('deviceStatus');
+            oFeatureHub.subscribe('deviceStatus', sMachineId, onReceiveData);
+
+            oFeatureHub.setDefaultTarget({
+              device: sMachineId, 
+              script: "test.py"
+            });
+
+            let oInstallRequest = {
+                url: location.origin + location.pathname.replace("webapp", "phapp") + "app.json",
+                urlType: "MANIFEST",
+                machineId: sMachineId
+            };
+
+            oFeatureHub.install(oInstallRequest, function(oResponse){
+              
+              oFeatureHub.send({ method:"restartApp" }, { "appId": "net.raspilab.experiments.growcab.phapp"});
+              setTimeout(function(){
+                oFeatureHub.send({ method:"sendMessage" }, { "action":"INIT", pin:19 });
+              }, 5000);
+            }, console.error)
+
+            
+          }
+        };
+
+        let onReceiveData = function(oData, mHeaders){
+            let to = new URL(mHeaders["fh-from"]),
+                sPhappId = to.searchParams.get("app");
+
+            if(sPhappId === "net.raspilab.experiments.growcab.phapp"){
+                console.log('S', oData, mHeaders);
+                
+                if(oData.state){
+                  let sMode = oData.state.mode;
+                  
+                  showMode(sMode);
+                }
+            }
+        };
+
+        //Modes
+        let elModes = document.getElementById("modes");
+        let showMode = function(sMode){
+            let aModes = elModes.querySelectorAll(".nav-item");
+            if(sMode === "OFF"){
+              aModes[0].querySelector(".nav-link").classList.add("active");
+              aModes[1].querySelector(".nav-link").classList.remove("active");
+            }
+            else if(sMode === "ON"){
+              aModes[0].querySelector(".nav-link").classList.remove("active");
+              aModes[1].querySelector(".nav-link").classList.add("active");
+            }
+          
+        };
+        let getMode = function(){
+            return elModes.querySelector(".nav-link.active").dataset.mode;
+        };
+
+        elModes.addEventListener("click", function(ev){
+            oFeatureHub.send({ method:"sendMessage" }, { "mode": ev.target.dataset.mode });
+        });
+
+        
+    </script>
+
+    
+    
+  </body>
+</html>

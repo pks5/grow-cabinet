@@ -1,0 +1,11 @@
+{
+    "app" : {
+        "id": "net.raspilab.experiments.growcab.phapp",
+        "name": "Grow Cabinet"
+    },
+
+    "scripts" : [
+        { "path": "test.py", "executable": true, "gpio": "rpi2"}
+    ]
+
+}
