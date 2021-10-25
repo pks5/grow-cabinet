@@ -2,6 +2,7 @@ from gpiozero import OutputDevice
 import json
 import sys
 import time
+import subprocess
 
 class GrowCabTest:
     def __init__(self, notify_url=None):
@@ -39,6 +40,14 @@ class GrowCabTest:
         
             if(action == "STATUS"):
                 self.send({'state' : self.state})
+                return
+
+            if(action == "SHUTDOWN"):
+                subprocess.run(["shutdown", "-h", "now"])
+                return
+
+            if(action == "REBOOT"):
+                subprocess.run(["shutdown", "-r", "now"])
                 return
 
             if (action == "INIT"):

@@ -58,6 +58,11 @@
           </ul>
         </div>
 
+        <div id="power-container">
+          <button class="btn btn-lg" id="shutdown-button">SHUTDOWN</button>
+          <button class="btn btn-lg" id="reboot-button">REBOOT</button>
+        </div>
+
         
       </div>
       
@@ -225,7 +230,16 @@
             oFeatureHub.send({ method:"sendMessage" }, { "mode": ev.target.dataset.mode });
         });
 
-        
+        let elShutdownButton = document.getElementById("shutdown-button"),
+            elRebootButton = document.getElementById("reboot-button");
+
+        elShutdownButton.addEventListener("click", function(){
+          oFeatureHub.send({ method:"sendMessage" }, { "action": "shutdown" });
+        });
+
+        elRebootButton.addEventListener("click", function(){
+          oFeatureHub.send({ method:"sendMessage" }, { "action": "reboot" });
+        });
     </script>
 
     
