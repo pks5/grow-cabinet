@@ -234,11 +234,11 @@
             elRebootButton = document.getElementById("reboot-button");
 
         elShutdownButton.addEventListener("click", function(){
-          oFeatureHub.send({ method:"sendMessage" }, { "action": "shutdown" });
+          oFeatureHub.send({ method:"sendMessage" }, { "action": "SHUTDOWN" });
         });
 
         elRebootButton.addEventListener("click", function(){
-          oFeatureHub.send({ method:"sendMessage" }, { "action": "reboot" });
+          oFeatureHub.send({ method:"sendMessage" }, { "action": "REBOOT" });
         });
     </script>
 
