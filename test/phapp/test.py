@@ -43,10 +43,12 @@ class GrowCabTest:
                 return
 
             if(action == "SHUTDOWN"):
+                print("Shutting down ...", flush=True)
                 subprocess.run(["shutdown", "-h", "now"])
                 return
 
             if(action == "REBOOT"):
+                print("Rebooting ...", flush=True)
                 subprocess.run(["shutdown", "-r", "now"])
                 return
 
