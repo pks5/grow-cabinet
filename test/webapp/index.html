@@ -152,8 +152,14 @@
             sCurrentValue = null;
           }
 
-          if(!sCurrentValue && oData.devices.length === 1){
-            elSelect.value = oData.devices[0].machineId;
+          if(!sCurrentValue){
+            if(oData.devices.length === 1){
+                elSelect.value = oData.devices[0].machineId;
+            }
+            else if (window.BletaElectron) {
+                elSelect.value = BletaElectron.getMachineId();
+				    }
+            
             DeviceSelection.onSelectDevice();
           }
         };
