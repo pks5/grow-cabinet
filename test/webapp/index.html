@@ -28,29 +28,20 @@
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <img src="https://www.raspilab.net/apps/prod_nb/nb_shared/img/raspilab-logo_256.png" alt="" width="27" height="27" class="d-inline-block align-text-top">  
-          Grow Cabinet</a>
-        
-        
-        <select class="form-select w-25" id="deviceSelect">
-          <option selected>Select Device</option>
-        </select>
-      </div>
-    </nav>
+    
 
     
     <div class="container">
       
-      <div class="d-flex mt-2">
-      <div id="brick">
-          <object data="block-4x4-3.svg" type="image/svg+xml" id="brick-svg"></object>
+      <div class="d-flex my-5 align-items-start">
+      <div>
+        <select class="form-select" id="deviceSelect">
+          <option selected>Select Device</option>
+        </select>
       </div>
       <div class="ms-4">
         <div id="modes-container">
-          <ul class="nav nav-pills border my-5" id="modes">
+          <ul class="nav nav-pills border" id="modes">
             <li class="nav-item">
               <a class="p-5 nav-link active" href="#" data-mode="OFF">OFF</a>
             </li>
@@ -60,7 +51,7 @@
           </ul>
         </div>
 
-        <div id="power-container">
+        <div id="power-container" style="display: none;">
           <button class="btn btn-secondary btn-lg" id="shutdown-button">Shutdown</button>
           <button class="btn btn-secondary btn-lg" id="reboot-button">Reboot</button>
           <button class="btn btn-secondary btn-lg" style="display:none;" id="exit-button">Exit</button>
@@ -239,26 +230,30 @@
             oFeatureHub.send({ method:"sendMessage" }, { "mode": ev.target.dataset.mode });
         });
 
-        let elShutdownButton = document.getElementById("shutdown-button"),
+        let elPowerContainer = document.getElementById("power-container");
+            elShutdownButton = document.getElementById("shutdown-button"),
             elRebootButton = document.getElementById("reboot-button"),
             elExitButton = document.getElementById("exit-button");
 
-        elShutdownButton.addEventListener("click", function(){
-          oFeatureHub.send({ method:"sendMessage" }, { "action": "SHUTDOWN" });
-        });
+        
 
-        elRebootButton.addEventListener("click", function(){
-          oFeatureHub.send({ method:"sendMessage" }, { "action": "REBOOT" });
-        });
+        if(typeof BletaElectron !== "undefined"){
+          elPowerContainer.style.display = "block";
 
-        if(BletaElectron){
-          elExitButton.style.display = "inline-block";
+          elShutdownButton.addEventListener("click", function(){
+            oFeatureHub.send({ method:"sendMessage" }, { "action": "SHUTDOWN" });
+          });
+
+          elRebootButton.addEventListener("click", function(){
+            oFeatureHub.send({ method:"sendMessage" }, { "action": "REBOOT" });
+          });
+          
           elExitButton.addEventListener("click", function(){
             BletaElectron.gracefulExit();
           });
         }
         else{
-          elExitButton.style.display = "none";
+          elPowerContainer.style.display = "none";
         }
     </script>
 
