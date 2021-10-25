@@ -61,6 +61,7 @@
         <div id="power-container">
           <button class="btn btn-lg" id="shutdown-button">Shutdown</button>
           <button class="btn btn-lg" id="reboot-button">Reboot</button>
+          <button class="btn btn-lg" style="display:none;" id="exit-button">Exit</button>
         </div>
 
         
@@ -237,7 +238,8 @@
         });
 
         let elShutdownButton = document.getElementById("shutdown-button"),
-            elRebootButton = document.getElementById("reboot-button");
+            elRebootButton = document.getElementById("reboot-button"),
+            elExitButton = document.getElementById("exit-button");
 
         elShutdownButton.addEventListener("click", function(){
           oFeatureHub.send({ method:"sendMessage" }, { "action": "SHUTDOWN" });
@@ -246,6 +248,16 @@
         elRebootButton.addEventListener("click", function(){
           oFeatureHub.send({ method:"sendMessage" }, { "action": "REBOOT" });
         });
+
+        if(BletaElectron){
+          elExitButton.style.display = "inline-block";
+          elExitButton.addEventListener("click", function(){
+            BletaElectron.gracefulExit();
+          });
+        }
+        else{
+          elExitButton.style.display = "none";
+        }
     </script>
 
     
