@@ -1,4 +1,4 @@
-from gpiozero import OutputDevice
+import gpiozero
 import json
 import sys
 import time
@@ -77,7 +77,7 @@ class GrowCab:
                     self.fan_speed_relay.close()
                     print("Closed Relay.", flush=True)
                 
-                self.fan_speed_relay = OutputDevice(pin_nr, active_high=False, initial_value=False)
+                self.fan_speed_relay = gpiozero.OutputDevice(pin_nr, active_high=False, initial_value=False)
                 print("Created Relay on pin " + str(pin_nr), flush=True)
 
                 self.state["pin"] = pin_nr
