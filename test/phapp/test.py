@@ -36,8 +36,6 @@ class GrowCab:
         print("<<" + json.dumps(payload), flush=True)
 
     def receive(self):
-        self.init_relays()
-        
         print("Ready to receive commands from socket ...")
         for line in sys.stdin:
             sMessage = line[:-1]
@@ -98,6 +96,8 @@ class GrowCab:
                 self.fan_speed_relay.off()
                 print("Set Relay to OFF", flush=True)
             elif(mode == "ON"):
+                self.light_relay.on()
+                self.fan_relay.on()
                 self.fan_speed_relay.on()
                 print("Set Relay to ON", flush=True)
             else:
@@ -132,16 +132,17 @@ class GrowCab:
             threading.Thread(target=self.read_dht).start()
         
     def init_relays(self):
-        relay1 = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=True)
-        relay2 = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=True)
-        relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
-        relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
+        self.light_relay = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=False)
+        self.fan_relay = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=False)
+        #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
+        #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
 
         print("Initialized relays.", flush=True)
 
 growcab = GrowCab()
 
 try:
+    growcab.init_relays()
     growcab.start_dht_reader()
     growcab.receive()
 except KeyboardInterrupt:
