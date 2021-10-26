@@ -3,12 +3,27 @@ import json
 import sys
 import time
 import subprocess
+import Adafruit_DHT
 
-class GrowCabTest:
+DHT_SENSOR = Adafruit_DHT.DHT11
+DHT_PIN = 5
+
+#Orange 
+RELAY1_PIN = 6
+#Gelb   
+RELAY2_PIN = 13
+#Grün   
+RELAY3_PIN = 19
+#Blau   
+RELAY4_PIN = 26
+
+
+class GrowCab:
     def __init__(self, notify_url=None):
         self.fan_speed_relay = None
         self.notify_url = notify_url
         self.state = {}
+        self.dht_thread_running = False
         
     def send(self, data):
         payload = {
@@ -88,10 +103,43 @@ class GrowCabTest:
             self.state["mode"] = mode
             self.send({'state' : self.state}) 
     
-buzzer = GrowCabTest()
+    def read_dht(self):
+        try:
+            
+            print("Connected to " + DHT_SENSOR + " on pin " + DHT_PIN, flush=True)
+
+            while True:
+                humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
+                if(humidity is not None and temperature is not None):
+                    print("Temp={0:0.1f}*C  Humidity={1:0.1f}%".format(temperature, humidity), flush=True)
+                else:
+                    print("Failed to retrieve data from humidity sensor", flush=True)
+                time.sleep(3)
+        except IOError as error:
+            print("IOError: " + str(error), flush=True)
+        finally:
+            self.dht_thread_running = False
+    
+    def start_dht_reader(self):
+        if(self.dht_thread_running):
+            print("DHT Reader thread already running.", flush=True)
+        else:
+            self.dht_thread_running = True
+            threading.Thread(target=self.read_dht).start()
+        
+    def init_relays(self):
+        relay1 = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=True)
+        relay2 = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=True)
+        #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
+        #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
+        print("Initialized relays.", flush=True)
+
+growcab = GrowCab()
 
 try:
-    buzzer.receive()
+    growcab.init_relays()
+    growcab.start_dht_reader()
+    growcab.receive()
 except KeyboardInterrupt:
     print('Good Bye!')
 finally:
