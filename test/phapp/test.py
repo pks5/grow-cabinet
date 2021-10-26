@@ -36,6 +36,8 @@ class GrowCab:
         print("<<" + json.dumps(payload), flush=True)
 
     def receive(self):
+        self.init_relays()
+        
         print("Ready to receive commands from socket ...")
         for line in sys.stdin:
             sMessage = line[:-1]
@@ -70,8 +72,6 @@ class GrowCab:
                 return
 
             if (action == "INIT"):
-                self.init_relays()
-
                 pin_nr = message_body["pin"]
                 if(pin_nr < 0 or pin_nr > 53):
                     print("Error: Pin out of range 0..53", flush=True)
