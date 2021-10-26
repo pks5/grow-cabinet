@@ -70,6 +70,9 @@ class GrowCab:
                 return
 
             if (action == "INIT"):
+                self.light_relay.on()
+                self.fan_relay.on()
+                
                 pin_nr = message_body["pin"]
                 if(pin_nr < 0 or pin_nr > 53):
                     print("Error: Pin out of range 0..53", flush=True)
@@ -96,8 +99,6 @@ class GrowCab:
                 self.fan_speed_relay.off()
                 print("Set Relay to OFF", flush=True)
             elif(mode == "ON"):
-                self.light_relay.on()
-                self.fan_relay.on()
                 self.fan_speed_relay.on()
                 print("Set Relay to ON", flush=True)
             else:
