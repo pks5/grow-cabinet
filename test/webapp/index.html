@@ -35,12 +35,8 @@
     <div class="container">
       
       <div class="d-flex my-5 align-items-start">
+      
       <div>
-        <select class="form-select" id="deviceSelect">
-          <option selected>Select Device</option>
-        </select>
-      </div>
-      <div class="ms-4">
         <div id="modes-container">
           <ul class="nav nav-pills border" id="modes">
             <li class="nav-item">
@@ -117,57 +113,22 @@
         let DeviceSelection = {};
 
         DeviceSelection.init = function(sId){
-            let elSelect = document.getElementById("deviceSelect");
-            elSelect.addEventListener("change", DeviceSelection.onSelectDevice);
-
-            DeviceSelection.elSelect = elSelect;
+            
         };
 
         DeviceSelection.onReceiveDevices = function(oData){
-          let elSelect = DeviceSelection.elSelect,
-              sCurrentValue = elSelect.value,
-              bCurrentValueFound = false;
-
-          elSelect.innerHTML = "";
-
-          elOpt = document.createElement('option');
-          elOpt.innerHTML = "Select Device";
-          elSelect.appendChild(elOpt);
-
-          for (let i = 0; i<oData.devices.length; i++){
-            let oDevice = oData.devices[i], 
-                elOpt = document.createElement('option');
-            
-            elOpt.value = oDevice.machineId;
-            elOpt.innerHTML = oDevice.hostName;
-            elSelect.appendChild(elOpt);
-
-            if(sCurrentValue && oDevice.machineId === sCurrentValue){
-              bCurrentValueFound = true;
-              elOpt.selected = true;
+            if(BletaElectron){
+              DeviceSelection.selectDevice(BletaElectron.getMachineId());
             }
-          }
-
-          if(!bCurrentValueFound){
-            sCurrentValue = null;
-          }
-
-          if(!sCurrentValue){
-            if(oData.devices.length === 1){
-                elSelect.value = oData.devices[0].machineId;
+            else{
+              for (let i = 0; i<oData.devices.length; i++){
+                  let oDevice = oData.devices[i];
+                  console.log(oDevice);
+              }
             }
-            else if (window.BletaElectron) {
-                elSelect.value = BletaElectron.getMachineId();
-				    }
-            
-            DeviceSelection.onSelectDevice();
-          }
         };
 
-        DeviceSelection.onSelectDevice = function(){
-          let elSelect = DeviceSelection.elSelect,
-              sMachineId = elSelect.value;
-          if(sMachineId){
+        DeviceSelection.selectDevice = function(sMachineId){
             oFeatureHub.unsubscribe('deviceConsole');
             oFeatureHub.subscribe('deviceConsole', sMachineId + "/console", function(oData, mHeaders){
                 term.writeln(oData.args[0]); 
@@ -196,7 +157,7 @@
             }, console.error)
 
             
-          }
+          
         };
 
         let onReceiveData = function(oData, mHeaders){
