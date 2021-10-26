@@ -35,6 +35,9 @@ class GrowCab:
         }
         print("<<" + json.dumps(payload), flush=True)
 
+    def upload_state(self):
+        self.send({"state" : self.state})
+    
     def receive(self):
         print("Ready to receive commands from socket ...")
         for line in sys.stdin:
@@ -72,7 +75,7 @@ class GrowCab:
             if (action == "INIT"):
                 self.light_relay.on()
                 self.fan_relay.on()
-                
+
                 pin_nr = message_body["pin"]
                 if(pin_nr < 0 or pin_nr > 53):
                     print("Error: Pin out of range 0..53", flush=True)
@@ -86,7 +89,7 @@ class GrowCab:
                 print("Created Relay on pin " + str(pin_nr), flush=True)
 
                 self.state["pin"] = pin_nr
-                self.send({'state' : self.state}) 
+                self.upload_state()
                     
         if(self.fan_speed_relay == None):
             print("Warning: Relay not initialized!", flush=True)
@@ -106,7 +109,7 @@ class GrowCab:
                 return
 
             self.state["mode"] = mode
-            self.send({'state' : self.state}) 
+            self.upload_state()
     
     def read_dht(self):
         try:
@@ -117,6 +120,9 @@ class GrowCab:
                 humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
                 if(humidity is not None and temperature is not None):
                     print("Temp={0:0.1f}*C  Humidity={1:0.1f}%".format(temperature, humidity), flush=True)
+                    self.state["temperature"] = temperature
+                    self.state["humidity"] = humidity
+                    self.upload_state()
                 else:
                     print("Failed to retrieve data from humidity sensor", flush=True)
                 time.sleep(3)
