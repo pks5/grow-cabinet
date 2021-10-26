@@ -132,8 +132,8 @@ class GrowCab:
     def init_relays(self):
         relay1 = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=True)
         relay2 = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=True)
-        #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
-        #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
+        relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
+        relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
 
         print("Initialized relays.", flush=True)
 
