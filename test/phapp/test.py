@@ -80,26 +80,8 @@ class GrowCab:
             if (action == "INIT"):
                 self.light_relay.on()
                 self.fan_relay.on()
-
-                pin_nr = message_body["pin"]
-                if(pin_nr < 0 or pin_nr > 53):
-                    print("Error: Pin out of range 0..53", flush=True)
-                    return
-
-                if(self.fan_speed_relay != None):
-                    self.fan_speed_relay.close()
-                    print("Closed Relay.", flush=True)
-                
-                self.fan_speed_relay = gpiozero.OutputDevice(pin_nr, active_high=False, initial_value=False)
-                print("Created Relay on pin " + str(pin_nr), flush=True)
-
-                self.state["pin"] = pin_nr
                 self.upload_state()
                     
-        if(self.fan_speed_relay == None):
-            print("Warning: Relay not initialized!", flush=True)
-            return
-            
         if("mode" in message_body):
             mode = message_body["mode"]
             
@@ -148,9 +130,9 @@ class GrowCab:
             self.light_relay = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=False)
         if(self.fan_relay is None):
             self.fan_relay = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=False)
-        #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
-        #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
-
+        if(self.fan_speed_relay is None):
+            self.fan_speed_relay = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
+        
         print("Initialized relays.", flush=True)
 
 growcab = GrowCab()
