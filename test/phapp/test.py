@@ -70,6 +70,8 @@ class GrowCab:
                 return
 
             if (action == "INIT"):
+                self.init_relays()
+
                 pin_nr = message_body["pin"]
                 if(pin_nr < 0 or pin_nr > 53):
                     print("Error: Pin out of range 0..53", flush=True)
@@ -140,7 +142,6 @@ class GrowCab:
 growcab = GrowCab()
 
 try:
-    growcab.init_relays()
     growcab.start_dht_reader()
     growcab.receive()
 except KeyboardInterrupt:
