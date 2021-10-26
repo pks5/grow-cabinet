@@ -123,7 +123,9 @@
             else{
               for (let i = 0; i<oData.devices.length; i++){
                   let oDevice = oData.devices[i];
-                  console.log(oDevice);
+                  if(oDevice.hostName === "growcab"){
+                    DeviceSelection.selectDevice(oDevice.machineId);
+                  }
               }
             }
         };
