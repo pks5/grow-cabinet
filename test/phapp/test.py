@@ -21,6 +21,8 @@ RELAY4_PIN = 26
 
 class GrowCab:
     def __init__(self, notify_url=None):
+        self.light_relay = None
+        self.fan_relay = None
         self.fan_speed_relay = None
         self.notify_url = notify_url
         self.state = {}
@@ -142,8 +144,10 @@ class GrowCab:
             threading.Thread(target=self.read_dht).start()
         
     def init_relays(self):
-        self.light_relay = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=False)
-        self.fan_relay = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=False)
+        if(self.light_relay is not None):
+            self.light_relay = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=False)
+        if(self.fan_relay is not None):
+            self.fan_relay = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=False)
         #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
         #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
 
