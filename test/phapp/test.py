@@ -144,9 +144,9 @@ class GrowCab:
             threading.Thread(target=self.read_dht).start()
         
     def init_relays(self):
-        if(self.light_relay is not None):
+        if(self.light_relay is None):
             self.light_relay = gpiozero.OutputDevice(RELAY1_PIN, active_high=False, initial_value=False)
-        if(self.fan_relay is not None):
+        if(self.fan_relay is None):
             self.fan_relay = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=False)
         #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
         #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
