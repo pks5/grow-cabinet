@@ -18,13 +18,13 @@
         background-size: cover;
       }
       
-
-        #brick{
-          padding:20px;
-        }
-        #brick-svg{
-          width:240px;
-        }
+      #temperature-container{
+          background-color:rgba(0,0,0,0.66);
+          border:solid 1px #d0d0d0;
+          border-radius: 10px;
+          padding:10px;
+          font-size: 2rem;
+      }
     </style>
   </head>
   <body>
@@ -60,6 +60,11 @@
       <button class="btn btn-secondary btn-lg" id="shutdown-button">Shutdown</button>
       <button class="btn btn-secondary btn-lg" id="reboot-button">Reboot</button>
       <button class="btn btn-secondary btn-lg" id="exit-button">Exit</button>
+    </div>
+
+    <div id="temperature-container">
+        <div id="temperature"><span id="temperature-value"></span></div>
+        <div id="humidity"><span id="humidity-value"></span></div>
     </div>
 
       <div id="xterm-container" style="display:none"></div>
@@ -204,6 +209,9 @@
                   let sMode = oData.state.mode;
                   
                   showMode(sMode);
+
+                  document.getElementById("temperature-value").textContent = oData.state.temperature;
+                  document.getElementById("humidity-value").textContent = oData.state.humidity;
                 }
             }
         };
