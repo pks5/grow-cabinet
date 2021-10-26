@@ -122,6 +122,9 @@ class GrowCab:
                     print("Temp={0:0.1f}*C  Humidity={1:0.1f}%".format(temperature, humidity), flush=True)
                     self.state["temperature"] = temperature
                     self.state["humidity"] = humidity
+                    self.state["fan_on"] = self.fan_relay.value == 1
+                    self.state["light_on"] = self.light_relay.value == 1
+                    self.state["fan_full_speed"] = self.fan_speed_relay.value == 1 
                     self.upload_state()
                 else:
                     print("Failed to retrieve data from humidity sensor", flush=True)
