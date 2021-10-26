@@ -117,7 +117,7 @@
         };
 
         DeviceSelection.onReceiveDevices = function(oData){
-            if(BletaElectron){
+            if(typeof BletaElectron !== "undefined"){
               DeviceSelection.selectDevice(BletaElectron.getMachineId());
             }
             else{
