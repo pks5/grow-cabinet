@@ -4,6 +4,7 @@ import sys
 import time
 import subprocess
 import Adafruit_DHT
+import threading
 
 DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 5
@@ -35,6 +36,7 @@ class GrowCab:
         print("<<" + json.dumps(payload), flush=True)
 
     def receive(self):
+        print("Ready to receive commands from socket ...")
         for line in sys.stdin:
             sMessage = line[:-1]
             
@@ -106,7 +108,7 @@ class GrowCab:
     def read_dht(self):
         try:
             
-            print("Connected to " + DHT_SENSOR + " on pin " + DHT_PIN, flush=True)
+            print("Connected to DHT sensor on pin " + str(DHT_PIN), flush=True)
 
             while True:
                 humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
@@ -132,6 +134,7 @@ class GrowCab:
         relay2 = gpiozero.OutputDevice(RELAY2_PIN, active_high=False, initial_value=True)
         #relay3 = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
         #relay4 = gpiozero.OutputDevice(RELAY4_PIN, active_high=False, initial_value=True)
+
         print("Initialized relays.", flush=True)
 
 growcab = GrowCab()
