@@ -67,6 +67,22 @@
       <div id="xterm-container" style="display:none"></div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/xterm@4.12.0/lib/xterm.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.0/bundles/stomp.umd.min.js"></script>
@@ -76,8 +92,10 @@
         const term = new Terminal();
         term.open(document.getElementById('xterm-container'));
 
-        
-        
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'), {
+          backdrop: "static"
+        });
+        errorModal.show();
             
 
         let oFeatureHub;
@@ -102,7 +120,7 @@
         let scriptLocation = 'https://my.featurehub.net/lib/v1/fhub.js';
 
         if(location.hostname.indexOf('.localnet') !== -1){
-            scriptLocation = 'http://my.featurehub.localnet:8787/lib/v1/fhub.js';
+          //  scriptLocation = 'http://my.featurehub.localnet:8787/lib/v1/fhub.js';
         }
 
         const script = document.createElement('script');

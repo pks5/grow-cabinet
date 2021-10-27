@@ -64,7 +64,7 @@ class GrowCab:
             action = message_body["action"]
         
             if(action == "STATUS"):
-                self.send({'state' : self.state})
+                self.upload_state()
                 return
 
             if(action == "SHUTDOWN"):
@@ -81,6 +81,7 @@ class GrowCab:
                 self.light_relay.on()
                 self.fan_relay.on()
                 self.upload_state()
+                return
                     
         if("mode" in message_body):
             mode = message_body["mode"]
