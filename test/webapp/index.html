@@ -27,7 +27,7 @@
         background-size: cover;
         height:100%;
         font-family: 'Roboto', sans-serif;
-        color:white;
+        
       }
 
       #main-layout{
@@ -35,6 +35,7 @@
          flex-direction: column;
          justify-content: space-between;
          height:100%;
+         color:white;
       }
 
       #features-container{
@@ -56,6 +57,8 @@
       .switch .form-check-input{
         margin-top:0;
       }
+
+      
       
       #temperature-container{
           line-height:1.2;
@@ -304,7 +307,7 @@
           
 
         if(typeof BletaElectron !== "undefined"){
-          elExitButton.style.display = "block";
+          elExitButton.style.display = "inline-block";
 
           elExitButton.addEventListener("click", function(){
             BletaElectron.gracefulExit();
