@@ -244,7 +244,16 @@
             let to = new URL(mHeaders["fh-from"]),
                 sPhappId = to.searchParams.get("app");
 
-            if(sPhappId === "net.raspilab.experiments.growcab.phapp"){
+            if(!sPhappId){
+                if(oData.connected){
+                    errorModal.hide();
+                }
+                else{
+                    errorModal.show(); 
+                }
+                  
+            }
+            else if(sPhappId === "net.raspilab.experiments.growcab.phapp"){
                 console.log('S', oData, mHeaders);
                 
                 if(oData.state){
@@ -256,9 +265,7 @@
                   document.getElementById("humidity-value").textContent = oData.state.humidity;
                 }
             }
-            else{
-              console.log(oData);
-            }
+            
         };
 
         //Modes
