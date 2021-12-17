@@ -88,16 +88,32 @@ class GrowCab:
             
             if(mode == "OFF"):
                 self.fan_speed_relay.off()
-                print("Set Relay to OFF", flush=True)
+                print("Set Fan Speed Relay to OFF", flush=True)
             elif(mode == "ON"):
                 self.fan_speed_relay.on()
-                print("Set Relay to ON", flush=True)
+                print("Set Fan Speed Relay to ON", flush=True)
             else:
                 print("Error: invalid mode!", flush=True)
                 return
 
-            self.state["mode"] = mode
             self.upload_state()
+            return
+
+        if("light_mode" in message_body):
+            light_mode = message_body["light_mode"]
+            
+            if(light_mode == "OFF"):
+                self.light_relay.off()
+                print("Set Light Relay to OFF", flush=True)
+            elif(light_mode == "ON"):
+                self.light_relay.on()
+                print("Set Light Relay to ON", flush=True)
+            else:
+                print("Error: invalid light mode!", flush=True)
+                return
+
+            self.upload_state()
+            return
     
     def read_dht(self):
         try:

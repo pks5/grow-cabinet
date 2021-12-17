@@ -89,11 +89,22 @@
         <div id="switches-container">
             <div class="switch">
               <div class="me-2">
-                  <i class="fas fa-fan"></i>
+                  <i id="fan-icon" class="fas fa-fan"></i>
               </div>
               <div>
                 <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" role="switch" id="fanSwitch">
+                </div>
+              </div>
+            </div>
+
+            <div class="switch mt-3">
+              <div class="me-2">
+                  <i id="light-icon" class="far fa-lightbulb"></i>
+              </div>
+              <div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="lightSwitch">
                 </div>
               </div>
             </div>
@@ -260,36 +271,53 @@
                 console.log('S', oData, mHeaders);
                 
                 if(oData.state){
-                  let sMode = oData.state.mode;
-                  
-                  showMode(sMode);
-
-                  document.getElementById("temperature-value").textContent = oData.state.temperature;
-                  document.getElementById("humidity-value").textContent = oData.state.humidity;
+                  updateState(oData.state);
                 }
             }
             
         };
 
         //Modes
-        let elFanCheck = document.getElementById("fanSwitch");
-        let elModes = document.getElementById("modes");
-        let showMode = function(sMode){
+        const elFanCheck = document.getElementById("fanSwitch"),
+            elFanIcon = document.getElementById("fan-icon"),
+            elLightSwitch = document.getElementById("lightSwitch"),
+            elLightIcon = document.getElementById("light-icon");
+        
+        let updateState = function(oState){
             
-            if(sMode === "OFF"){
-              elFanCheck.checked = false;
+            if(typeof oState.fan_full_speed !== "undefined"){
+              if(oState.fan_full_speed){
+                elFanCheck.checked = true;
+                elFanIcon.classList.add("fa-spin");
+              }
+              else{
+                elFanCheck.checked = false;
+                elFanIcon.classList.remove("fa-spin");
+              }
             }
-            else if(sMode === "ON"){
-              elFanCheck.checked = true;
+
+            if(typeof oState.light_on !== "undefined"){
+              if(oState.light_on){
+                elLightSwitch.checked = true;
+                elLightIcon.className = "fas fa-lightbulb";
+              }
+              else{
+                elLightSwitch.checked = false;
+                elLightIcon.className = "far fa-lightbulb";
+              }
             }
-          
+
+            document.getElementById("temperature-value").textContent = oState.temperature;
+            document.getElementById("humidity-value").textContent = oState.humidity;
         };
-        let getMode = function(){
-            return elModes.querySelector(".nav-link.active").dataset.mode;
-        };
+        
 
         elFanCheck.addEventListener("click", function(ev){
             oFeatureHub.send({ method:"sendMessage" }, { "mode": this.checked ? "ON" : "OFF" });
+        });
+
+        elLightSwitch.addEventListener("click", function(ev){
+            oFeatureHub.send({ method:"sendMessage" }, { "light_mode": this.checked ? "ON" : "OFF" });
         });
 
         let elPowerContainer = document.getElementById("power-container");
