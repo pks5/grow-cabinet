@@ -334,9 +334,10 @@
                 }
                 else{
                     elStatusModal.show(); 
-                    console.log("Device %s is disconnected. Retrying in 5 seconds ...", sMachineId);
+                    console.log("Device %s is disconnected.", sMachineId);
 
                     if(!iTimeOut){
+                      console.log("Retrying in 5 seconds ...");
                       iTimeOut = setTimeout(function(){
                         oFeatureHub.send({ method:"requestStatus" }, { });
                         iTimeOut = null;
