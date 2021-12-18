@@ -314,6 +314,7 @@
         /*
         * Triggered when a Device Status Message has been received
         */ 
+        let iTimeOut = null;
         let onReceiveDeviceStatus = function(oData, mHeaders){
             
 
@@ -335,9 +336,12 @@
                     elStatusModal.show(); 
                     console.log("Device %s is disconnected. Retrying in 5 seconds ...", sMachineId);
 
-                    setTimeout(function(){
-                      oFeatureHub.send({ method:"requestStatus" }, { });
-                    }, 5000);
+                    if(!iTimeOut){
+                      iTimeOut = setTimeout(function(){
+                        oFeatureHub.send({ method:"requestStatus" }, { });
+                        iTimeOut = null;
+                      }, 5000);
+                    }
                     
                 }
                   
