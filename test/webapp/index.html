@@ -25,6 +25,7 @@
         background-image: url('./img/bg.jpg');
         background-repeat: no-repeat;
         background-size: cover;
+        background-position: center;
         height:100%;
         font-family: 'Roboto', sans-serif;
         
@@ -54,12 +55,29 @@
         
       }
 
+      .switch .form-switch .form-check-input{
+         box-shadow: none;
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
+      }
+
+      .switch .form-check-input:checked {
+          background-color: #fe41ff;
+          border-color: #fe41ff;
+      }
+
       .switch .form-check-input{
         margin-top:0;
       }
 
-      
-      
+      .switch-icon-container{
+        flex: 0 0 60px;
+        text-align: center;
+      }
+
+      .switch-icon{
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
+      }
+
       #temperature-container{
           line-height:1.2;
           
@@ -70,13 +88,30 @@
 
       #temperature-container .label{
         font-size: 1.5rem;
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
       }
 
       #temperature-container .value{
         font-size: 8rem;
         font-weight:700;
-        
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
       }
+
+      .neonText {
+        
+        color: #fdfdfd;
+        text-shadow:
+          0 0 7px #fdfdfd,
+          0 0 10px #fdfdfd,
+          0 0 21px #fdfdfd,
+          0 0 42px #fe41ff,
+          0 0 82px #fe41ff,
+          0 0 92px #fe41ff,
+          0 0 102px #fe41ff,
+          0 0 151px #fe41ff;
+      }
+
+      
     </style>
   </head>
   <body>
@@ -88,8 +123,8 @@
       <div id="features-container">
         <div id="switches-container">
             <div class="switch">
-              <div class="me-2">
-                  <i id="fan-icon" class="fas fa-fan"></i>
+              <div class="switch-icon-container me-2">
+                  <i id="fan-icon" class="switch-icon fas fa-fan"></i>
               </div>
               <div>
                 <div class="form-check form-switch">
@@ -99,8 +134,8 @@
             </div>
 
             <div class="switch mt-3">
-              <div class="me-2">
-                  <i id="light-icon" class="far fa-lightbulb"></i>
+              <div class="switch-icon-container me-2">
+                  <i id="light-icon" class="switch-icon far fa-lightbulb"></i>
               </div>
               <div>
                 <div class="form-check form-switch">
@@ -141,11 +176,11 @@
     <div id="xterm-container" style="display:none"></div>
 
     <!-- Modal -->
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <h5 class="modal-title" id="statusModalLabel">Error</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -163,23 +198,28 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
     
     <script>
+        const oConfig = {
+          appId: "net.raspilab.experiments.growcab",
+          pyAppId: "net.raspilab.experiments.growcab.phapp",
+          deviceHostName: "growcab",
+          authClientId: "growcab_local"
+        };
+
         const term = new Terminal();
         term.open(document.getElementById('xterm-container'));
 
-        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'), {
+        const elStatusModal = new bootstrap.Modal(document.getElementById('statusModal'), {
           backdrop: "static"
         });
-        errorModal.show();
-            
-
+        
         let oFeatureHub;
 
         let fnConnect = function(){
             DeviceSelection.init("deviceSelect");
             
             oFeatureHub = new FeatureHub({
-                appId: "net.raspilab.experiments.growcab",
-                clientId: 'growcab_local'
+                appId: oConfig.appId,
+                clientId: oConfig.authClientId
             });
 
             console.log(oFeatureHub)
@@ -208,6 +248,9 @@
             
         };
 
+        /**
+         * Triggered when the list of available devices has been received
+         */ 
         DeviceSelection.onReceiveDevices = function(oData){
             if(typeof BletaElectron !== "undefined"){
               DeviceSelection.selectDevice(BletaElectron.getMachineId());
@@ -215,7 +258,7 @@
             else{
               for (let i = 0; i<oData.devices.length; i++){
                   let oDevice = oData.devices[i];
-                  if(oDevice.hostName === "growcab"){
+                  if(oDevice.hostName === oConfig.deviceHostName){
                     DeviceSelection.selectDevice(oDevice.machineId);
                   }
               }
@@ -223,19 +266,33 @@
         };
 
         DeviceSelection.selectDevice = function(sMachineId){
-            oFeatureHub.unsubscribe('deviceConsole');
-            oFeatureHub.subscribe('deviceConsole', sMachineId + "/console", function(oData, mHeaders){
-                term.writeln(oData.args[0]); 
-            });
-
-            oFeatureHub.unsubscribe('deviceStatus');
-            oFeatureHub.subscribe('deviceStatus', sMachineId, onReceiveData);
-
+            /*
+            * Setup Default Target
+            */
             oFeatureHub.setDefaultTarget({
               device: sMachineId, 
               script: "test.py"
             });
 
+            /*
+            * Subscribe to Console
+            */
+            oFeatureHub.unsubscribe('deviceConsole');
+            oFeatureHub.subscribe('deviceConsole', sMachineId + "/console", function(oData, mHeaders){
+                term.writeln(oData.args[0]); 
+            });
+
+            /*
+            * Subscribe to Device Status
+            */
+            oFeatureHub.unsubscribe('deviceStatus');
+            oFeatureHub.subscribe('deviceStatus', sMachineId, onReceiveDeviceStatus);
+
+            oFeatureHub.send({ method:"requestStatus" }, { });
+
+            /*
+            * Install PyApp
+            */
             let oInstallRequest = {
                 url: location.origin + location.pathname.replace("webapp", "phapp") + "app.json",
                 urlType: "MANIFEST",
@@ -244,54 +301,79 @@
 
             oFeatureHub.install(oInstallRequest, function(oResponse){
               
-              oFeatureHub.send({ method:"restartApp" }, { "appId": "net.raspilab.experiments.growcab.phapp"});
+              oFeatureHub.send({ method:"restartApp" }, { "appId": oConfig.pyAppId });
               setTimeout(function(){
-                oFeatureHub.send({ method:"sendMessage" }, { "action":"INIT", pin:19 });
+                oFeatureHub.send({ method:"sendMessage" }, { "action": "INIT" });
               }, 5000);
-            }, console.error)
-
-            
-          
+            }, 
+            function(oError){
+              console.error("ERROR: ", oError);
+            });
         };
 
-        let onReceiveData = function(oData, mHeaders){
-            let to = new URL(mHeaders["fh-from"]),
-                sPhappId = to.searchParams.get("app");
+        /*
+        * Triggered when a Device Status Message has been received
+        */ 
+        let onReceiveDeviceStatus = function(oData, mHeaders){
+            
+
+            let sFrom = new URL(mHeaders["fh-from"]),
+                aPathParts = sFrom.pathname.split("/"),
+                sMachineId = aPathParts[aPathParts.length-1],
+                sPhappId = sFrom.searchParams.get("app");
+
+                console.log('STATUS', sPhappId, oData, mHeaders);
 
             if(!sPhappId){
+                //A message without the PyApp id
+                //Information from the device itself
                 if(oData.connected){
-                    errorModal.hide();
+                    console.log("Device %s is connected.", sMachineId);
+                    elStatusModal.hide();
                 }
                 else{
-                    errorModal.show(); 
+                    elStatusModal.show(); 
+                    console.log("Device %s is disconnected. Retrying in 5 seconds ...", sMachineId);
+
+                    setTimeout(function(){
+                      oFeatureHub.send({ method:"requestStatus" }, { });
+                    }, 5000);
+                    
                 }
                   
             }
-            else if(sPhappId === "net.raspilab.experiments.growcab.phapp"){
-                console.log('S', oData, mHeaders);
-                
+            else if(sPhappId === oConfig.pyAppId){
+                //A message from the growcab PyApp
                 if(oData.state){
                   updateState(oData.state);
                 }
             }
+            else{
+                //Ignore messages from other PyApps on this device
+            }
             
         };
 
-        //Modes
-        const elFanCheck = document.getElementById("fanSwitch"),
+        /*
+        * Switches
+        */
+        const elFanSwitch = document.getElementById("fanSwitch"),
             elFanIcon = document.getElementById("fan-icon"),
             elLightSwitch = document.getElementById("lightSwitch"),
             elLightIcon = document.getElementById("light-icon");
         
+        /*
+        * Update GUI on State change
+        */
         let updateState = function(oState){
             
             if(typeof oState.fan_full_speed !== "undefined"){
               if(oState.fan_full_speed){
-                elFanCheck.checked = true;
+                elFanSwitch.checked = true;
                 elFanIcon.classList.add("fa-spin");
               }
               else{
-                elFanCheck.checked = false;
+                elFanSwitch.checked = false;
                 elFanIcon.classList.remove("fa-spin");
               }
             }
@@ -299,7 +381,8 @@
             if(typeof oState.light_on !== "undefined"){
               if(oState.light_on){
                 elLightSwitch.checked = true;
-                elLightIcon.className = "fas fa-lightbulb";
+                elLightIcon.className = "fas fa-lightbulb neonText";
+                
               }
               else{
                 elLightSwitch.checked = false;
@@ -311,32 +394,50 @@
             document.getElementById("humidity-value").textContent = oState.humidity;
         };
         
-
-        elFanCheck.addEventListener("click", function(ev){
-            oFeatureHub.send({ method:"sendMessage" }, { "mode": this.checked ? "ON" : "OFF" });
+        /*
+        * Fan Speed Switch Click Handler
+        */ 
+        elFanSwitch.addEventListener("click", function(ev){
+            oFeatureHub.send({ method: "sendMessage" }, { "mode": this.checked ? "ON" : "OFF" });
         });
 
+        /*
+        * Light Switch Click Handler
+        */
         elLightSwitch.addEventListener("click", function(ev){
-            oFeatureHub.send({ method:"sendMessage" }, { "light_mode": this.checked ? "ON" : "OFF" });
+            oFeatureHub.send({ method: "sendMessage" }, { "light_mode": this.checked ? "ON" : "OFF" });
         });
 
-        let elPowerContainer = document.getElementById("power-container");
-            elShutdownButton = document.getElementById("shutdown-button"),
+        /*
+        * Buttons
+        */
+        let elShutdownButton = document.getElementById("shutdown-button"),
             elRebootButton = document.getElementById("reboot-button"),
             elExitButton = document.getElementById("exit-button");
 
+        /*
+        * Shutdown Button Click Handler
+        */    
         elShutdownButton.addEventListener("click", function(){
-          oFeatureHub.send({ method:"sendMessage" }, { "action": "SHUTDOWN" });
+          oFeatureHub.send({ method: "sendMessage" }, { "action": "SHUTDOWN" });
         });
 
+        /*
+        * Reboot Button Click Handler
+        */
         elRebootButton.addEventListener("click", function(){
-          oFeatureHub.send({ method:"sendMessage" }, { "action": "REBOOT" });
+          oFeatureHub.send({ method: "sendMessage" }, { "action": "REBOOT" });
         });
           
-
+        /*
+        * Show Exit Button when shown inside an display
+        */
         if(typeof BletaElectron !== "undefined"){
           elExitButton.style.display = "inline-block";
 
+          /*
+          * Exit Button Handler
+          */
           elExitButton.addEventListener("click", function(){
             BletaElectron.gracefulExit();
           });
