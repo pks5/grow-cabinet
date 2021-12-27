@@ -294,7 +294,7 @@
             * Install PyApp
             */
             let oInstallRequest = {
-                url: location.origin + location.pathname.replace("webapp", "phapp") + "app.json",
+                url: (new URL("app.json", location.origin + location.pathname.replace("webapp", "phapp"))).toString(),
                 urlType: "MANIFEST",
                 machineId: sMachineId
             };
