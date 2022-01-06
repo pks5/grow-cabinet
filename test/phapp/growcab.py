@@ -55,7 +55,7 @@ class GrowCab:
                 except KeyboardInterrupt:
                     raise
                 except Exception as e:
-                    print(e)
+                    print(e, file=sys.stderr)
 
     def process(self, message):
         message_body = message["body"]
@@ -79,12 +79,6 @@ class GrowCab:
                 subprocess.run(["shutdown", "-r", "now"])
                 return
 
-            if (action == "INIT"):
-                self.light_relay.on()
-                self.fan_relay.on()
-                self.upload_state()
-                return
-                    
         if("mode" in message_body):
             mode = message_body["mode"]
             
@@ -152,14 +146,19 @@ class GrowCab:
         if(self.fan_speed_relay is None):
             self.fan_speed_relay = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
         
+        self.light_relay.on()
+        self.fan_relay.on()
+        self.upload_state()
+
         print("Initialized relays.", flush=True)
 
 growcab = GrowCab()
 
 try:
+    growcab.receive()
     growcab.init_relays()
     growcab.start_dht_reader()
-    growcab.receive()
+    
 except KeyboardInterrupt:
     print('Good Bye!')
 finally:

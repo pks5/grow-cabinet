@@ -300,14 +300,10 @@
             };
 
             oFeatureHub.install(oInstallRequest, function(oResponse){
-              
-              oFeatureHub.send({ method:"restartApp" }, { "appId": oConfig.pyAppId });
-              setTimeout(function(){
-                oFeatureHub.send({ method:"sendMessage" }, { "action": "INIT" });
-              }, 5000);
+                
             }, 
             function(oError){
-              console.error("ERROR: ", oError);
+                console.error("ERROR: ", oError);
             });
         };
 
