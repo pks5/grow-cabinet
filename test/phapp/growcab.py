@@ -55,7 +55,7 @@ class GrowCab:
                 except KeyboardInterrupt:
                     raise
                 except Exception as e:
-                    print(e, file=sys.stderr)
+                    print(e, file=sys.stderr, flush=True)
 
     def process(self, message):
         message_body = message["body"]
