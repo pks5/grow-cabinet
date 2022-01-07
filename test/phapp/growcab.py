@@ -44,7 +44,7 @@ class GrowCab:
         self.send({"state" : self.state})
     
     def receive(self):
-        print("Ready to receive commands from socket ...")
+        print("Ready to receive commands from socket ...", flush=True)
         for line in sys.stdin:
             sMessage = line[:-1]
             
@@ -113,7 +113,7 @@ class GrowCab:
     
     def read_dht(self):
         try:
-            
+            self.dht_thread_running = True
             print("Connected to DHT sensor on pin " + str(DHT_PIN), flush=True)
 
             while True:
@@ -135,7 +135,6 @@ class GrowCab:
         if(self.dht_thread_running):
             print("DHT Reader thread already running.", flush=True)
         else:
-            self.dht_thread_running = True
             threading.Thread(target=self.read_dht).start()
         
     def init_relays(self):
