@@ -155,9 +155,9 @@ class GrowCab:
 growcab = GrowCab()
 
 try:
-    growcab.receive()
     growcab.init_relays()
     growcab.start_dht_reader()
+    growcab.receive()
     
 except KeyboardInterrupt:
     print('Good Bye!')
