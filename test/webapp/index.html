@@ -399,6 +399,7 @@
         * Fan Speed Switch Click Handler
         */ 
         elFanSwitch.addEventListener("click", function(ev){
+            ev.preventDefault();
             oFeatureHub.send({ method: "sendMessage" }, { "mode": this.checked ? "ON" : "OFF" });
         });
 
@@ -406,6 +407,7 @@
         * Light Switch Click Handler
         */
         elLightSwitch.addEventListener("click", function(ev){
+            ev.preventDefault();
             oFeatureHub.send({ method: "sendMessage" }, { "light_mode": this.checked ? "ON" : "OFF" });
         });
 
