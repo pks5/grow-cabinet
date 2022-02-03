@@ -27,6 +27,8 @@ class GrowCab:
         self.notify_url = notify_url
         self.state = {}
         self.dht_thread_running = False
+        self.retry_time = 1
+        self.update_time = 3
         
     def send(self, data):
         payload = {
@@ -112,11 +114,11 @@ class GrowCab:
             return
     
     def read_dht(self):
-        try:
-            self.dht_thread_running = True
-            print("Connected to DHT sensor on pin " + str(DHT_PIN), flush=True)
+        self.dht_thread_running = True
+        print("Listening to DHT sensor on pin " + str(DHT_PIN), flush=True)
 
-            while True:
+        while True:
+            try:
                 humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
                 if(humidity is not None and temperature is not None):
                     print("Temp={0:0.1f}*C  Humidity={1:0.1f}%".format(temperature, humidity), flush=True)
@@ -125,12 +127,15 @@ class GrowCab:
                     self.upload_state()
                 else:
                     print("Failed to retrieve data from humidity sensor", flush=True)
-                time.sleep(3)
-        except IOError as error:
-            print("IOError: " + str(error), flush=True)
-        finally:
-            self.dht_thread_running = False
-    
+                time.sleep(self.update_time)
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                print(e, file=sys.stderr, flush=True)
+                time.sleep(self.retry_time)
+        
+        print("Listener thread finished.", flush=True)
+        
     def start_dht_reader(self):
         if(self.dht_thread_running):
             print("DHT Reader thread already running.", flush=True)
@@ -150,15 +155,19 @@ class GrowCab:
         self.upload_state()
 
         print("Initialized relays.", flush=True)
+    
+    def cleanup(self):
+        self.dht_thread_running = False
+        print("cleanup", flush=True)
 
-growcab = GrowCab()
 
 try:
+    growcab = GrowCab()
     growcab.init_relays()
     growcab.start_dht_reader()
     growcab.receive()
     
 except KeyboardInterrupt:
-    print('Good Bye!')
+    print('Good Bye!', flush=True)
 finally:
-    print("cleanup")
+    growcab.cleanup()
