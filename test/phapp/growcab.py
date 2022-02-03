@@ -3,10 +3,11 @@ import json
 import sys
 import time
 import subprocess
-import Adafruit_DHT
+import board
+import adafruit_dht
 import threading
 
-DHT_SENSOR = Adafruit_DHT.DHT11
+#DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 5
 
 #Orange 
@@ -26,6 +27,7 @@ class GrowCab:
         self.fan_speed_relay = None
         self.notify_url = notify_url
         self.state = {}
+        self.dht_device = None
         self.dht_thread_running = False
         self.retry_time = 1
         self.update_time = 3
@@ -119,7 +121,8 @@ class GrowCab:
 
         while True:
             try:
-                humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
+                humidity = self.dht_device.humidity
+                temperature = self.dht_device.temperature
                 if(humidity is not None and temperature is not None):
                     print("Temp={0:0.1f}*C  Humidity={1:0.1f}%".format(temperature, humidity), flush=True)
                     self.state["temperature"] = temperature
@@ -150,6 +153,9 @@ class GrowCab:
         if(self.fan_speed_relay is None):
             self.fan_speed_relay = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
         
+        if(self.dht_device is None):
+            self.dht_device = adafruit_dht.DHT11(DHT_PIN)
+
         self.light_relay.on()
         self.fan_relay.on()
         self.upload_state()
@@ -158,6 +164,9 @@ class GrowCab:
     
     def cleanup(self):
         self.dht_thread_running = False
+        if(self.dht_device is not None):
+            self.dht_device.exit()
+            print("Closed DHT device.", flush=True)
         print("cleanup", flush=True)
 
 
