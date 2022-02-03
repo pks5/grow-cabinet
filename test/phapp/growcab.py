@@ -3,11 +3,12 @@ import json
 import sys
 import time
 import subprocess
-import board
-import adafruit_dht
+import Adafruit_DHT
+#import board
+#import adafruit_dht
 import threading
 
-#DHT_SENSOR = Adafruit_DHT.DHT11
+DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 5
 
 #Orange 
@@ -121,9 +122,10 @@ class GrowCab:
 
         while True:
             try:
-                humidity = self.dht_device.humidity
-                temperature = self.dht_device.temperature
+                humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
                 if(humidity is not None and temperature is not None):
+                #humidity = self.dht_device.humidity
+                #temperature = self.dht_device.temperature
                     print("Temp={0:0.1f}*C  Humidity={1:0.1f}%".format(temperature, humidity), flush=True)
                     self.state["temperature"] = temperature
                     self.state["humidity"] = humidity
@@ -131,6 +133,9 @@ class GrowCab:
                 else:
                     print("Failed to retrieve data from humidity sensor", flush=True)
                 time.sleep(self.update_time)
+            #except RuntimeError as e:
+            #    print(e, file=sys.stderr, flush=True)
+            #    time.sleep(self.retry_time)
             except KeyboardInterrupt:
                 raise
             except Exception as e:
@@ -153,8 +158,8 @@ class GrowCab:
         if(self.fan_speed_relay is None):
             self.fan_speed_relay = gpiozero.OutputDevice(RELAY3_PIN, active_high=False, initial_value=False)
         
-        if(self.dht_device is None):
-            self.dht_device = adafruit_dht.DHT11(DHT_PIN)
+        #if(self.dht_device is None):
+        #    self.dht_device = adafruit_dht.DHT11(DHT_PIN)
 
         self.light_relay.on()
         self.fan_relay.on()
@@ -164,9 +169,9 @@ class GrowCab:
     
     def cleanup(self):
         self.dht_thread_running = False
-        if(self.dht_device is not None):
-            self.dht_device.exit()
-            print("Closed DHT device.", flush=True)
+        #if(self.dht_device is not None):
+        #    self.dht_device.exit()
+        #    print("Closed DHT device.", flush=True)
         print("cleanup", flush=True)
 
 
