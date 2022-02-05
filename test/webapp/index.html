@@ -400,8 +400,8 @@
               }
             }
 
-            document.getElementById("temperature-value").textContent = oState.temperature;
-            document.getElementById("humidity-value").textContent = oState.humidity;
+            document.getElementById("temperature-value").textContent = Number(oState.temperature).toFixed(1);
+            document.getElementById("humidity-value").textContent = Number(oState.humidity).toFixed(1);
         };
         
         /*
