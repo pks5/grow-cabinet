@@ -1,6 +1,6 @@
 {
     "app" : {
-        "version": "0.9.3",
+        "version": "0.9.4",
         "id": "net.raspilab.experiments.growcab.phapp",
         "name": "Grow Cabinet"
     },

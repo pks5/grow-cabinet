@@ -8,7 +8,7 @@ import Adafruit_DHT
 #import adafruit_dht
 import threading
 
-DHT_SENSOR = Adafruit_DHT.DHT11
+DHT_SENSOR = Adafruit_DHT.DHT22
 DHT_PIN = 5
 
 #Orange 
