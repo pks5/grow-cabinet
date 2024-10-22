@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.12.0/css/xterm.min.css">
+
+    <title>Grow Cabinet - Raspilab Experiments</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+      html{
+        height:100%;
+        
+      }
+      body{
+        background-image: url('./img/bg.jpeg');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        height:100%;
+        font-family: 'Roboto', sans-serif;
+        
+      }
+
+      #main-layout{
+         display:flex;
+         flex-direction: column;
+         justify-content: space-between;
+         height:100%;
+         color:white;
+      }
+
+      #features-container{
+        display:flex;
+        justify-content: space-between;
+        padding:1rem 3rem;
+      }
+
+      #switches-container{
+        font-size:3rem;
+        line-height:1;
+      }
+
+      #letters-container{
+        font-size:8rem;
+        line-height: 1;
+        text-align:center;
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
+      }
+
+      .switch{
+        display:flex;
+        
+      }
+
+      .switch .form-switch .form-check-input{
+         box-shadow: none;
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
+      }
+
+      .switch .form-check-input:checked {
+          background-color: #fe41ff;
+          border-color: #fe41ff;
+      }
+
+      .switch .form-check-input{
+        margin-top:0;
+      }
+
+      .switch-icon-container{
+        flex: 0 0 60px;
+        text-align: center;
+      }
+
+      .switch-icon{
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
+      }
+
+      #temperature-container{
+          line-height:1.2;
+          
+          display:flex;
+          justify-content: space-between;
+          padding:1rem 3rem;
+      }
+
+      #temperature-container .label{
+        font-size: 1.5rem;
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
+      }
+
+      #temperature-container .value{
+        font-size: 8rem;
+        font-weight:700;
+        text-shadow: 0 -1px 1px #FFFFFF, 0 1px 1px #666666;
+      }
+
+      .neonText {
+        
+        color: #fdfdfd;
+        text-shadow:
+          0 0 7px #fdfdfd,
+          0 0 10px #fdfdfd,
+          0 0 21px #fdfdfd,
+          0 0 42px #fe41ff,
+          0 0 82px #fe41ff,
+          0 0 92px #fe41ff,
+          0 0 102px #fe41ff,
+          0 0 151px #fe41ff;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    
+
+    <div id="main-layout">
+    
+      
+      <div id="features-container">
+        <div id="switches-container">
+            <div class="switch">
+              <div class="switch-icon-container me-2">
+                  <i id="fan-icon" class="switch-icon fas fa-fan"></i>
+              </div>
+              <div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="fanSwitch">
+                </div>
+              </div>
+            </div>
+
+            <div class="switch mt-3">
+              <div class="switch-icon-container me-2">
+                  <i id="light-icon" class="switch-icon far fa-lightbulb"></i>
+              </div>
+              <div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="lightSwitch">
+                </div>
+              </div>
+            </div>
+        </div>
+        
+          <div id="buttons-container">
+            <button class="btn btn-secondary btn-lg" id="shutdown-button"><i class="fas fa-power-off"></i> Shutdown</button>
+            <button class="btn btn-secondary btn-lg" id="reboot-button"><i class="fas fa-sync-alt"></i> Reboot</button>
+            <button  style="display: none;" class="btn btn-secondary btn-lg" id="exit-button"><i class="fas fa-door-open"></i> Exit</button>
+          </div>
+         
+    </div>
+
+    <div id="letters-container">
+      HERBS
+    </div>
+
+    <div id="temperature-container">
+        <div id="temperature">
+            <div class="label"><i class="fas fa-thermometer-half"></i> Temperature</div>
+            <div class="value">
+                <span id="temperature-value"></span><span>°C</span>
+             </div>
+        </div>
+        <div id="humidity">
+          <div class="label"><i class="fas fa-tint"></i> Humidity</div>
+          <div class="value">  
+              <span id="humidity-value"></span><span>%</span>
+          </div>
+         </div>
+    </div>
+
+      
+    </div>
+
+    <div id="xterm-container" style="display:none"></div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="statusModalLabel">Connection Error</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@4.12.0/lib/xterm.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.0/bundles/stomp.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    
+    <script>
+        const oConfig = {
+          featureId: "net.raspilab.experiments.growcab",
+          pyAppId: "net.raspilab.experiments.growcab.phapp",
+          deviceHostName: "growcab",
+          clientId: "growcab"
+        };
+
+        const term = new Terminal();
+        term.open(document.getElementById('xterm-container'));
+
+        const elStatusModal = new bootstrap.Modal(document.getElementById('statusModal'), {
+          backdrop: "static"
+        });
+        
+        let oFeatureHub;
+
+        let fnConnect = function(){
+            DeviceSelection.init("deviceSelect");
+            
+            oFeatureHub = new Feature({
+                featureId: oConfig.featureId,
+                clientId: oConfig.clientId
+            });
+
+            console.log(oFeatureHub)
+
+            oFeatureHub.connect(function(oServerInfo){
+                oFeatureHub.devices(DeviceSelection.onReceiveDevices);
+
+                term.writeln("Connected to " + oServerInfo.webSocketUrl);
+            });
+        };
+
+        let scriptLocation = 'https://devapp.featurehub.net/lib/v1/feature.js';
+
+        if(location.hostname.indexOf('.localnet') !== -1){
+          //  scriptLocation = 'http://app.featurehub.localnet:8787/lib/v1/fhub.js';
+        }
+
+        const script = document.createElement('script');
+        script.src = scriptLocation;
+        script.addEventListener('load', fnConnect);
+        document.body.appendChild(script);
+
+        let DeviceSelection = {};
+
+        DeviceSelection.init = function(sId){
+            
+        };
+
+        /**
+         * Triggered when the list of available devices has been received
+         */ 
+        DeviceSelection.onReceiveDevices = function(oData){
+            if(typeof BletaElectron !== "undefined"){
+              DeviceSelection.selectDevice(BletaElectron.getMachineId());
+            }
+            else{
+              for (let i = 0; i<oData.devices.length; i++){
+                  let oDevice = oData.devices[i];
+                  if(oDevice.machineId === "d0de1f986e99352a502e341d4bc9d4f2686d97bd"){
+                    DeviceSelection.selectDevice(oDevice.machineId);
+                  }
+              }
+            }
+        };
+
+        DeviceSelection.selectDevice = function(sMachineId){
+            DeviceSelection.m_sMachineId = sMachineId;
+
+            /*
+            * Subscribe to Console
+            */
+            oFeatureHub.unsubscribe('deviceConsole');
+            oFeatureHub.subscribeToBroadcast('deviceConsole', sMachineId + "/console", function(oData, mHeaders){
+                term.writeln(oData.args[0]); 
+            });
+
+            /*
+            * Subscribe to Device Status
+            */
+            oFeatureHub.unsubscribe('deviceStatus');
+            oFeatureHub.subscribeToBroadcast('deviceStatus', sMachineId, onReceiveDeviceStatus);
+
+            oFeatureHub.sendMessage({ device: sMachineId, method:"requestStatus" }, { });
+
+            /*
+            * Install PyApp
+            */
+            let oInstallRequest = {
+                url: (new URL("app.json", location.origin + location.pathname.replace("webapp", "phapp"))).toString(),
+                urlType: "MANIFEST",
+                machineId: sMachineId
+            };
+
+            oFeatureHub.install(oInstallRequest, function(oResponse){
+                
+            }, 
+            function(oError){
+                console.error("ERROR: ", oError);
+            });
+        };
+
+        /*
+        * Triggered when a Device Status Message has been received
+        */ 
+        let iTimeOut = null;
+        let onReceiveDeviceStatus = function(oData, mHeaders){
+            
+
+            let sFrom = new URL(mHeaders["fh-from"]),
+                aPathParts = sFrom.pathname.split("/"),
+                sMachineId = aPathParts[aPathParts.length-1],
+                sPhappId = sFrom.searchParams.get("app");
+
+                console.log('STATUS', sPhappId, oData, mHeaders);
+
+            if(!sPhappId){
+                //A message without the PyApp id
+                //Information from the device itself
+                if(oData.connected){
+                    console.log("Device %s is connected.", sMachineId);
+                    elStatusModal.hide();
+                }
+                else{
+                    elStatusModal.show(); 
+                    console.log("Device %s is disconnected.", sMachineId);
+
+                    if(!iTimeOut){
+                      console.log("Retrying in 5 seconds ...");
+                      iTimeOut = setTimeout(function(){
+                        oFeatureHub.sendMessage({ device: sMachineId, method:"requestStatus" }, { });
+                        iTimeOut = null;
+                      }, 5000);
+                    }
+                    
+                }
+                  
+            }
+            else if(sPhappId === oConfig.pyAppId){
+                //A message from the growcab PyApp
+                if(oData.state){
+                  updateState(oData.state);
+                }
+            }
+            else{
+                //Ignore messages from other PyApps on this device
+            }
+            
+        };
+
+        /*
+        * Switches
+        */
+        const elFanSwitch = document.getElementById("fanSwitch"),
+            elFanIcon = document.getElementById("fan-icon"),
+            elLightSwitch = document.getElementById("lightSwitch"),
+            elLightIcon = document.getElementById("light-icon");
+        
+        /*
+        * Update GUI on State change
+        */
+        let updateState = function(oState){
+            
+            if(typeof oState.fan_full_speed !== "undefined"){
+              if(oState.fan_full_speed){
+                elFanSwitch.checked = true;
+                elFanIcon.classList.add("fa-spin");
+              }
+              else{
+                elFanSwitch.checked = false;
+                elFanIcon.classList.remove("fa-spin");
+              }
+            }
+
+            if(typeof oState.light_on !== "undefined"){
+              if(oState.light_on){
+                elLightSwitch.checked = true;
+                elLightIcon.className = "fas fa-lightbulb neonText";
+                
+              }
+              else{
+                elLightSwitch.checked = false;
+                elLightIcon.className = "far fa-lightbulb";
+              }
+            }
+
+            document.getElementById("temperature-value").textContent = Number(oState.temperature).toFixed(1);
+            document.getElementById("humidity-value").textContent = Number(oState.humidity).toFixed(1);
+        };
+        
+        /*
+        * Fan Speed Switch Click Handler
+        */ 
+        elFanSwitch.addEventListener("click", function(ev){
+            ev.preventDefault();
+            oFeatureHub.sendMessage({ device: DeviceSelection.m_sMachineId, app: oConfig.pyAppId, script: "growcab.py", method: "sendMessage" }, { "mode": this.checked ? "ON" : "OFF" });
+        });
+
+        /*
+        * Light Switch Click Handler
+        */
+        elLightSwitch.addEventListener("click", function(ev){
+            ev.preventDefault();
+            oFeatureHub.sendMessage({ device: DeviceSelection.m_sMachineId, app: oConfig.pyAppId, script: "growcab.py", method: "sendMessage" }, { "light_mode": this.checked ? "ON" : "OFF" });
+        });
+
+        /*
+        * Buttons
+        */
+        let elShutdownButton = document.getElementById("shutdown-button"),
+            elRebootButton = document.getElementById("reboot-button"),
+            elExitButton = document.getElementById("exit-button");
+
+        /*
+        * Shutdown Button Click Handler
+        */    
+        elShutdownButton.addEventListener("click", function(){
+          oFeatureHub.sendMessage({ device: DeviceSelection.m_sMachineId, app: oConfig.pyAppId, script: "growcab.py", method: "sendMessage" }, { "action": "SHUTDOWN" });
+        });
+
+        /*
+        * Reboot Button Click Handler
+        */
+        elRebootButton.addEventListener("click", function(){
+          oFeatureHub.sendMessage({ device: DeviceSelection.m_sMachineId, app: oConfig.pyAppId, script: "growcab.py", method: "sendMessage" }, { "action": "REBOOT" });
+        });
+          
+        /*
+        * Show Exit Button when shown inside an display
+        */
+        if(typeof BletaElectron !== "undefined"){
+          elExitButton.style.display = "inline-block";
+
+          /*
+          * Exit Button Handler
+          */
+          elExitButton.addEventListener("click", function(){
+            BletaElectron.gracefulExit();
+          });
+        }
+        else{
+          elExitButton.style.display = "none";
+        }
+    </script>
+
+    
+    
+  </body>
+</html>
