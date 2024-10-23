@@ -7,6 +7,9 @@
 
     "scripts" : [
         { "path": "growcab.py", "executable": true, "gpio": "rpi2"}
+    ],
+
+    "dependencies" : [
     ]
 
 }
