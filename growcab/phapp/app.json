@@ -1,6 +1,6 @@
 {
     "app" : {
-        "version": "0.9.5",
+        "version": "0.9.6",
         "id": "net.raspilab.experiments.growcab.phapp",
         "name": "Grow Cabinet"
     },
@@ -11,7 +11,10 @@
 
     "dependencies" : [
         {
-            "name": "Adafruit_DHT"
+            "name": "adafruit-circuitpython-dht"
+        },
+        {
+            "name": "lgpio"
         },
         {
             "name": "gpiozero"
