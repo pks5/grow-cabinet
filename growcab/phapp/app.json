@@ -14,7 +14,7 @@
             "name": "Adafruit_DHT"
         },
         {
-            "name": "gpizero"
+            "name": "gpiozero"
         }
     ]
 
