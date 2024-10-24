@@ -10,6 +10,12 @@
     ],
 
     "dependencies" : [
+        {
+            "name": "Adafruit_DHT"
+        },
+        {
+            "name": "gpizero"
+        }
     ]
 
 }
