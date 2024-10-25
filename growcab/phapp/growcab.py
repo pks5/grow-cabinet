@@ -74,13 +74,13 @@ class GrowCab:
             if(action == "SHUTDOWN"):
                 print("Shutting down ...", flush=True)
                 time.sleep(0.25)
-                subprocess.run(["shutdown", "-h", "now"])
+                subprocess.run(["sudo", "shutdown", "-h", "now"])
                 return
 
             if(action == "REBOOT"):
                 print("Rebooting ...", flush=True)
                 time.sleep(0.25)
-                subprocess.run(["shutdown", "-r", "now"])
+                subprocess.run(["sudo", "shutdown", "-r", "now"])
                 return
 
         if("mode" in message_body):
