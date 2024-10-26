@@ -3,7 +3,6 @@ import json
 import sys
 import time
 import subprocess
-#import Adafruit_DHT
 import board
 import adafruit_dht
 import threading
@@ -119,7 +118,7 @@ class GrowCab:
         self.dht_thread_running = True
         print("Listening to DHT sensor on pin " + str(DHT_PIN), flush=True)
 
-        while True:
+        while self.dht_thread_running:
             try:
                 humidity = self.dht_device.humidity
                 temperature = self.dht_device.temperature
